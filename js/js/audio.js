@@ -14,6 +14,18 @@ export class SoundManager {
         osc.start(); osc.stop(this.ctx.currentTime + 0.11);
     }
 
+    playHeadshot() {
+        this.resume();
+        const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1850, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(2400, this.ctx.currentTime + 0.09);
+        gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.09);
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.09);
+    }
+
     playExplosion() {
         this.resume();
         const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
