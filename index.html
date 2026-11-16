@@ -1,161 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Escape from Duckov</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cloudflare.com"></script>
-    <script src="https://jsdelivr.net"></script>
-    <script src="https://unpkg.com"></script>
-</head>
-<body>
-    <!-- Loading Screen -->
-    <div id="loading-screen">
-        <h1>ESCAPE FROM DUCKOV</h1>
-        <p id="loading-text">Initializing 3D Engine & Procedural Assets...</p>
-        <div class="progress-track"><div id="progress-fill"></div></div>
-    </div>
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; }
+body { overflow: hidden; background: #0e1318; color: #eceff1; }
 
-    <!-- Sniper ADS Scope Overlay -->
-    <div id="scope-overlay" class="hidden">
-        <div class="scope-line-h"></div>
-        <div class="scope-line-v"></div>
-    </div>
+#menu-screen {
+  position: absolute; inset: 0; background: radial-gradient(circle at center, #1c2833 0%, #0b0f14 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; padding: 20px;
+}
+#menu-screen h1 { font-size: 40px; color: #f1c40f; text-shadow: 0 4px 15px rgba(241,196,15,0.3); letter-spacing: 2px; }
+.subtitle { color: #90a4ae; margin-bottom: 18px; font-size: 14px; }
+.hideout-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 1020px; width: 100%; }
 
-    <!-- Lobby, Party System & Stash Management -->
-    <div id="lobby" class="hidden">
-        <h1>ESCAPE FROM DUCKOV</h1>
-        <div class="lobby-grid">
-            <!-- Party Squad Panel -->
-            <div class="panel">
-                <h3>PARTY SQUAD</h3>
-                <input type="text" id="player-name" value="AgentDuck" placeholder="Your Callsign">
-                <div class="id-box">
-                    <small>Your Party Code:</small>
-                    <strong id="peer-id-display">Connecting...</strong>
-                </div>
-                <input type="text" id="join-id" placeholder="Paste Party Leader Code">
-                <button id="join-btn" class="secondary">Join Friend's Party</button>
-                <div id="party-roster">
-                    <div class="party-member">1. AgentDuck (Leader)</div>
-                </div>
-                <button id="open-stash-btn" style="margin-top: auto;">Manage Stash & Loadout</button>
-            </div>
+.card { background: rgba(24, 34, 44, 0.95); border: 1px solid #37474f; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; }
+.card h3 { color: #4fc3f7; margin-bottom: 10px; font-size: 16px; border-bottom: 1px solid #2c3e50; padding-bottom: 6px; }
+.stat-row { display: flex; justify-content: space-between; margin: 4px 0; font-size: 14px; }
+.info-box { font-size: 12px; color: #90a4ae; margin-top: 8px; line-height: 1.4; min-height: 34px; }
+.cash-text { color: #2ecc71; }
+.accent-text { color: #4fc3f7; }
 
-            <!-- Match & Skins Panel -->
-            <div class="panel">
-                <h3>MATCH & SKINS</h3>
-                <label>Game Mode (Auto-Randomizes Map):</label>
-                <select id="mode-select">
-                    <option value="extraction">Extraction (Persistent Loot)</option>
-                    <option value="br100">100-Duck Battle Royale (Supply Drops)</option>
-                    <option value="valorant">5v5 Tactical Spike (Agent Abilities)</option>
-                    <option value="finals">The Finals Cashout (Vault & Defend)</option>
-                </select>
+select, button {
+  width: 100%; padding: 9px; margin-top: 8px; border-radius: 5px; border: 1px solid #546e7a;
+  background: #263238; color: #fff; font-size: 13px; cursor: pointer; transition: 0.15s;
+}
+select:hover, button:hover { background: #37474f; }
+.btn-small { width: auto; padding: 4px 10px; margin-top: 0; font-size: 12px; }
+.btn-danger { background: #4a1c1c; border-color: #7f2a2a; font-size: 12px; margin-top: auto; }
+.btn-danger:hover { background: #6b2424; }
 
-                <label>Duck Skin:</label>
-                <select id="duck-skin">
-                    <option value="0xffd700">Classic Mallard Gold</option>
-                    <option value="0x2e4d2e">Tactical Forest Camo</option>
-                    <option value="0x111111">Night Ops Spec-Duck</option>
-                    <option value="0x00ffff">Cyber Neon Duck</option>
-                </select>
+.btn-deploy {
+  background: #27ae60; border-color: #2ecc71; font-size: 18px; font-weight: bold;
+  max-width: 340px; margin-top: 20px; padding: 13px; letter-spacing: 1px;
+}
+.btn-deploy:hover { background: #2ecc71; color: #000; }
 
-                <label>Weapon Finish:</label>
-                <select id="weapon-skin">
-                    <option value="default">Factory Standard</option>
-                    <option value="0xffd700">24K Golden Quack</option>
-                    <option value="0xff0055">Crimson Hyperbeast</option>
-                    <option value="0x00ffcc">Ice Dragon</option>
-                </select>
+.stash-box { margin-top: 10px; background: #141d24; border: 1px solid #2c3e50; border-radius: 5px; padding: 8px; }
+.stash-header { display: flex; justify-content: space-between; align-items: center; font-size: 12px; margin-bottom: 6px; color: #b0bec5; }
+.item-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; min-height: 90px; }
+.grid-slot {
+  background: #1e2a34; border: 1px solid #37474f; border-radius: 4px; padding: 6px;
+  font-size: 11px; text-align: center; cursor: pointer; display: flex; flex-direction: column; justify-content: center; min-height: 52px;
+}
+.grid-slot:hover { border-color: #f1c40f; background: #263642; }
+.grid-slot.rare { border-color: #d4af37; color: #ffe082; }
+.grid-slot.weapon { border-color: #4fc3f7; color: #81d4fa; }
 
-                <div class="stash-box">
-                    <span>Bank: $<strong id="stash-cash">1500</strong></span> | 
-                    <span>Equipped: <strong id="lobby-equipped">Duck-18</strong></span>
-                </div>
+#backpack-modal {
+  position: absolute; inset: 0; background: rgba(0, 0, 0, 0.72); z-index: 15;
+  display: none; align-items: center; justify-content: center;
+}
+.backpack-window {
+  background: #18222c; border: 2px solid #4fc3f7; border-radius: 8px; padding: 18px; width: 520px;
+}
+.bp-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.bp-footer { margin-top: 10px; font-size: 12px; color: #90a4ae; text-align: center; }
 
-                <button id="host-btn">Deploy Party Into Match</button>
-                <button id="range-btn" class="secondary">Lobby Shooting Range</button>
-            </div>
+#hud { position: absolute; inset: 0; pointer-events: none; display: none; }
+#status-panel {
+  position: absolute; top: 15px; left: 15px; width: 280px;
+  background: rgba(12, 18, 24, 0.88); border: 1px solid #37474f; border-radius: 6px; padding: 12px;
+}
+.hud-row { display: flex; justify-content: space-between; font-size: 13px; }
+.bar-wrap { width: 100%; height: 10px; background: #1c262f; border-radius: 3px; overflow: hidden; margin: 4px 0 8px; }
+#hp-fill { height: 100%; width: 100%; background: #e74c3c; transition: width 0.1s; }
+#armor-fill { height: 100%; width: 100%; background: #3498db; transition: width 0.1s; }
+#stamina-fill { height: 100%; width: 100%; background: #f1c40f; transition: width 0.1s; }
 
-            <!-- Keybinds Panel -->
-            <div class="panel">
-                <h3>KEYBINDS</h3>
-                <div id="keybind-list"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Lobby Stash Management Modal -->
-    <div id="stash-modal" class="hidden">
-        <h2>PERSISTENT STASH & LOADOUT</h2>
-        <p>Click any saved weapon to equip it for your next raid, or buy supplies:</p>
-        <div id="stash-grid"></div>
-        <button id="close-stash-btn" style="width: 100%; margin-top: 12px;">Save Loadout & Close</button>
-    </div>
-
-    <!-- In-Game HUD -->
-    <div id="hud" class="hidden">
-        <canvas id="minimap" width="160" height="160"></canvas>
-        <div id="top-bar">
-            <span id="hud-mode">WARMUP</span> | 
-            <span id="hud-score">Ready</span> | 
-            <span id="hud-timer">--</span> | 
-            <span>Cash: $<span id="hud-cash">1500</span></span> |
-            <span>Elims: <strong id="hud-elims">0</strong></span> |
-            <span>Alive: <span id="hud-alive">1</span></span>
-        </div>
-
-        <!-- Valorant-Only Agent Abilities Bar -->
-        <div id="ability-bar" class="hidden">
-            <div class="ability-slot">[Q] Smoke Orb<br><small id="cd-q">READY</small></div>
-            <div class="ability-slot">[C] Tailwind Dash<br><small id="cd-c">READY</small></div>
-            <div class="ability-slot">[X] Healing Aura<br><small id="cd-x">READY</small></div>
-        </div>
-
-        <div id="bottom-bar">
-            <div>HP: <strong id="hud-hp">100</strong> | Stamina: <strong id="hud-stamina">100%</strong></div>
-            <div>Weapon: <strong id="hud-weapon">Duck-18</strong> (<span id="hud-range">85m</span>)</div>
-            <div>Ammo: <strong id="hud-ammo">15 / 15</strong> | Frags [G]: <strong id="hud-nades">2</strong></div>
-        </div>
-        <div id="center-alert"></div>
-        <div id="hit-feedback" class="hidden">HEADSHOT!</div>
-        <div id="interact-prompt" class="hidden">Press [F] to Loot</div>
-        <div id="crosshair">+</div>
-    </div>
-
-    <!-- Post-Match Victory / Elimination Summary Screen -->
-    <div id="summary-modal" class="hidden">
-        <h1 id="summary-title">MATCH COMPLETE</h1>
-        <p id="summary-subtitle">Extraction Successful</p>
-        <div class="summary-stats">
-            <div>Eliminations: <strong id="sum-elims">0</strong></div>
-            <div>Damage Dealt: <strong id="sum-dmg">0</strong></div>
-            <div>Cash Earned: $<strong id="sum-cash">0</strong></div>
-            <div>Total Stash Bank: $<strong id="sum-stash">0</strong></div>
-        </div>
-        <button id="return-lobby-btn" style="width: 100%; margin-top: 15px;">Return to Lobby & Save Stash</button>
-    </div>
-
-    <!-- Dead Body & Supply Drop Loot Window -->
-    <div id="loot-menu" class="hidden">
-        <h2 id="loot-title">FALLEN DUCK BACKPACK</h2>
-        <div id="dead-loot-grid"></div>
-        <button id="take-all-btn" style="margin-top: 12px; width: 100%;">Take All & Close</button>
-    </div>
-
-    <!-- Player Backpack Inventory (Press Tab) -->
-    <div id="inventory-menu" class="hidden">
-        <h2>TACTICAL BACKPACK (Press Tab to Close)</h2>
-        <div id="inventory-grid"></div>
-    </div>
-
-    <!-- Armory / Buy Menu (Press B) -->
-    <div id="buy-menu" class="hidden">
-        <h2>TACTICAL ARMORY (Press B to Close)</h2>
-        <div id="weapon-list"></div>
-    </div>
-
-    <script type="module" src="js/main.js"></script>
-</body>
-</html>
+#radar {
+  position: absolute; top: 15px; right: 15px; width: 170px; height: 170px;
+  background: rgba(10, 16, 22, 0.9); border: 2px solid #455a64; border-radius: 50%;
+}
+#loot-feed {
+  position: absolute; bottom: 55px; left: 15px; width: 320px; font-size: 13px; color: #f1c40f;
+  text-shadow: 1px 1px 2px #000;
+}
+#controls-bar {
+  position: absolute; bottom: 12px; left: 15px; background: rgba(12,18,24,0.88);
+  padding: 8px 14px; border-radius: 5px; border: 1px solid #37474f; font-size: 12px; color: #b0bec5;
+}
+#center-alert {
+  position: absolute; top: 22%; left: 50%; transform: translateX(-50%);
+  font-size: 26px; font-weight: bold; text-shadow: 0 2px 10px #000; display: none;
+}
+#prompt-text {
+  position: absolute; top: 62%; left: 50%; transform: translateX(-50%);
+  background: rgba(0,0,0,0.8); padding: 6px 14px; border-radius: 4px; font-size: 14px; display: none;
+}
