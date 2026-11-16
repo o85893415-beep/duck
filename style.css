@@ -1,6 +1,16 @@
-body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #111; color: white; user-select: none; }
+body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; background: #0d1117; color: white; user-select: none; }
 .hidden { display: none !important; }
-#lobby, #buy-menu, #inventory-menu, #loot-menu, #summary-modal {
+
+/* Loading Screen */
+#loading-screen {
+    position: fixed; inset: 0; background: #0d1117; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; z-index: 50;
+}
+.progress-track { width: 380px; height: 14px; background: #1e2631; border-radius: 7px; overflow: hidden; border: 1px solid #f5a623; margin-top: 12px; }
+#progress-fill { width: 0%; height: 100%; background: #f5a623; transition: width 0.2s; }
+
+/* Modals */
+#lobby, #buy-menu, #inventory-menu, #loot-menu, #summary-modal, #stash-modal {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
     background: rgba(18, 22, 28, 0.96); padding: 24px; border-radius: 10px;
     border: 2px solid #f5a623; text-align: center; z-index: 10; box-shadow: 0 10px 35px rgba(0,0,0,0.9);
@@ -14,14 +24,18 @@ button { background: #f5a623; color: #111; font-weight: bold; cursor: pointer; }
 button:hover { background: #ffb732; }
 button.secondary { background: #3b82f6; color: white; }
 button.secondary:hover { background: #60a5fa; }
-.id-box, .stash-box { background: #11161d; padding: 8px; border-radius: 5px; border: 1px dashed #f5a623; word-break: break-all; font-size: 12px; }
+
+.id-box, .stash-box { background: #11161d; padding: 8px; border-radius: 5px; border: 1px dashed #f5a623; word-break: break-all; font-size: 12px; text-align: center; }
 #party-roster { background: #151b23; border-radius: 5px; padding: 8px; min-height: 70px; display: flex; flex-direction: column; gap: 5px; }
 .party-member { background: #2a323d; padding: 5px 10px; border-radius: 4px; font-size: 13px; border-left: 3px solid #22c55e; }
 .bind-row { display: flex; justify-content: space-between; align-items: center; background: #2a323d; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
 .bind-btn { width: 75px; padding: 3px; background: #45505e; color: white; font-size: 11px; }
-#weapon-list, #inventory-grid, #dead-loot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 440px; margin-top: 12px; }
+
+#weapon-list, #inventory-grid, #dead-loot-grid, #stash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 450px; margin-top: 12px; max-height: 300px; overflow-y: auto; }
 .inv-item { background: #2a323d; border: 1px solid #f5a623; padding: 10px; border-radius: 6px; cursor: pointer; color: white; }
 .inv-item:hover { background: #3b4654; }
+
+/* HUD */
 #hud { pointer-events: none; }
 #minimap { position: absolute; top: 15px; right: 15px; border: 2px solid #f5a623; border-radius: 50%; background: rgba(15, 20, 25, 0.85); }
 #top-bar { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.75); padding: 8px 22px; border-radius: 20px; font-size: 15px; white-space: nowrap; }
@@ -30,9 +44,12 @@ button.secondary:hover { background: #60a5fa; }
 .ability-slot { background: rgba(18, 22, 28, 0.85); border: 2px solid #38bdf8; padding: 8px 14px; border-radius: 6px; text-align: center; font-size: 13px; font-weight: bold; }
 .ability-slot small { color: #22c55e; }
 #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #00ff00; font-size: 24px; transition: transform 0.1s; }
-#center-alert { position: absolute; top: 16%; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: bold; color: #00ff00; text-shadow: 2px 2px 4px #000; text-align: center; }
+#center-alert { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: bold; color: #00ff00; text-shadow: 2px 2px 4px #000; text-align: center; }
+#hit-feedback { position: absolute; top: 44%; left: 50%; transform: translateX(-50%); color: #ff3333; font-weight: bold; font-size: 18px; text-shadow: 1px 1px 3px #000; }
 #interact-prompt { position: absolute; top: 58%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); border: 1px solid #f5a623; padding: 8px 16px; border-radius: 6px; font-size: 16px; color: #ffd700; }
 .summary-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #151b23; padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 16px; width: 360px; }
+
+/* Scope */
 #scope-overlay { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 28%, rgba(0,0,0,0.96) 32%); z-index: 4; }
 .scope-line-h { position: absolute; top: 50%; left: 0; width: 100%; height: 1px; background: rgba(255, 0, 0, 0.7); }
 .scope-line-v { position: absolute; left: 50%; top: 0; width: 1px; height: 100%; background: rgba(255, 0, 0, 0.7); }
