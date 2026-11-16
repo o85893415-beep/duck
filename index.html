@@ -1,4 +1,3 @@
-html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,14 +9,21 @@ html
     <script src="https://unpkg.com"></script>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <h1>ESCAPE FROM DUCKOV</h1>
+        <p id="loading-text">Initializing 3D Engine & Procedural Assets...</p>
+        <div class="progress-track"><div id="progress-fill"></div></div>
+    </div>
+
     <!-- Sniper ADS Scope Overlay -->
     <div id="scope-overlay" class="hidden">
         <div class="scope-line-h"></div>
         <div class="scope-line-v"></div>
     </div>
 
-    <!-- Lobby, Party System & Persistent Stash -->
-    <div id="lobby">
+    <!-- Lobby, Party System & Stash Management -->
+    <div id="lobby" class="hidden">
         <h1>ESCAPE FROM DUCKOV</h1>
         <div class="lobby-grid">
             <!-- Party Squad Panel -->
@@ -33,11 +39,7 @@ html
                 <div id="party-roster">
                     <div class="party-member">1. AgentDuck (Leader)</div>
                 </div>
-                <div class="stash-box">
-                    <strong>PERSISTENT STASH</strong><br>
-                    <span>Bank: $<strong id="stash-cash">1500</strong></span> | 
-                    <span>Weapons: <strong id="stash-count">0</strong></span>
-                </div>
+                <button id="open-stash-btn" style="margin-top: auto;">Manage Stash & Loadout</button>
             </div>
 
             <!-- Match & Skins Panel -->
@@ -46,8 +48,9 @@ html
                 <label>Game Mode (Auto-Randomizes Map):</label>
                 <select id="mode-select">
                     <option value="extraction">Extraction (Persistent Loot)</option>
-                    <option value="br100">100-Duck Battle Royale (Battle Bus)</option>
+                    <option value="br100">100-Duck Battle Royale (Supply Drops)</option>
                     <option value="valorant">5v5 Tactical Spike (Agent Abilities)</option>
+                    <option value="finals">The Finals Cashout (Vault & Defend)</option>
                 </select>
 
                 <label>Duck Skin:</label>
@@ -66,6 +69,11 @@ html
                     <option value="0x00ffcc">Ice Dragon</option>
                 </select>
 
+                <div class="stash-box">
+                    <span>Bank: $<strong id="stash-cash">1500</strong></span> | 
+                    <span>Equipped: <strong id="lobby-equipped">Duck-18</strong></span>
+                </div>
+
                 <button id="host-btn">Deploy Party Into Match</button>
                 <button id="range-btn" class="secondary">Lobby Shooting Range</button>
             </div>
@@ -78,12 +86,20 @@ html
         </div>
     </div>
 
+    <!-- Lobby Stash Management Modal -->
+    <div id="stash-modal" class="hidden">
+        <h2>PERSISTENT STASH & LOADOUT</h2>
+        <p>Click any saved weapon to equip it for your next raid, or buy supplies:</p>
+        <div id="stash-grid"></div>
+        <button id="close-stash-btn" style="width: 100%; margin-top: 12px;">Save Loadout & Close</button>
+    </div>
+
     <!-- In-Game HUD -->
     <div id="hud" class="hidden">
         <canvas id="minimap" width="160" height="160"></canvas>
         <div id="top-bar">
             <span id="hud-mode">WARMUP</span> | 
-            <span id="hud-score">Round 1</span> | 
+            <span id="hud-score">Ready</span> | 
             <span id="hud-timer">--</span> | 
             <span>Cash: $<span id="hud-cash">1500</span></span> |
             <span>Elims: <strong id="hud-elims">0</strong></span> |
@@ -92,9 +108,9 @@ html
 
         <!-- Valorant-Only Agent Abilities Bar -->
         <div id="ability-bar" class="hidden">
-            <div class="ability-slot" id="ab-q">[Q] Smoke Orb<br><small id="cd-q">READY</small></div>
-            <div class="ability-slot" id="ab-c">[C] Tailwind Dash<br><small id="cd-c">READY</small></div>
-            <div class="ability-slot" id="ab-x">[X] Healing Aura<br><small id="cd-x">READY</small></div>
+            <div class="ability-slot">[Q] Smoke Orb<br><small id="cd-q">READY</small></div>
+            <div class="ability-slot">[C] Tailwind Dash<br><small id="cd-c">READY</small></div>
+            <div class="ability-slot">[X] Healing Aura<br><small id="cd-x">READY</small></div>
         </div>
 
         <div id="bottom-bar">
@@ -103,6 +119,7 @@ html
             <div>Ammo: <strong id="hud-ammo">15 / 15</strong> | Frags [G]: <strong id="hud-nades">2</strong></div>
         </div>
         <div id="center-alert"></div>
+        <div id="hit-feedback" class="hidden">HEADSHOT!</div>
         <div id="interact-prompt" class="hidden">Press [F] to Loot</div>
         <div id="crosshair">+</div>
     </div>
@@ -120,20 +137,20 @@ html
         <button id="return-lobby-btn" style="width: 100%; margin-top: 15px;">Return to Lobby & Save Stash</button>
     </div>
 
-    <!-- Dead Body Loot Window -->
+    <!-- Dead Body & Supply Drop Loot Window -->
     <div id="loot-menu" class="hidden">
-        <h2>FALLEN DUCK BACKPACK</h2>
+        <h2 id="loot-title">FALLEN DUCK BACKPACK</h2>
         <div id="dead-loot-grid"></div>
         <button id="take-all-btn" style="margin-top: 12px; width: 100%;">Take All & Close</button>
     </div>
 
     <!-- Player Backpack Inventory (Press Tab) -->
     <div id="inventory-menu" class="hidden">
-        <h2>TACTICAL BACKPACK & STASH (Press Tab to Close)</h2>
+        <h2>TACTICAL BACKPACK (Press Tab to Close)</h2>
         <div id="inventory-grid"></div>
     </div>
 
-    <!-- Armory / Valorant Buy Menu (Press B) -->
+    <!-- Armory / Buy Menu (Press B) -->
     <div id="buy-menu" class="hidden">
         <h2>TACTICAL ARMORY (Press B to Close)</h2>
         <div id="weapon-list"></div>
